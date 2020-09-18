@@ -35,5 +35,25 @@ public class Deck {
 		Collections.shuffle( this.cards ) ;
 
 	}
+	
+	/*
+	 * Used this to test the shuffle method as suggested in User Story #2. Commented
+	 * out because being able to just *read* the deck would be silly in any card
+	 * game.
+	 * 
+	 * public String toString() {
+	 * 
+	 * String strOut = "";
+	 * 
+	 * for (Card c : this.cards ) {
+	 * 
+	 * strOut += String.format( "%s%n" , c.toString() );
+	 * 
+	 * }
+	 * 
+	 * return strOut;
+	 * 
+	 * }
+	 */
 
 }

@@ -1,2 +1,3 @@
 .DS_Store
 bin
+src/com/skilldistillery/common/cards/Dealing.java
