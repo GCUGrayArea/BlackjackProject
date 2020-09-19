@@ -54,4 +54,32 @@ public class Card {
 	public int getValue() {
 		return this.rank.getValue();
 	}
+	
+	public char[] printingInfo() {
+		char[] outArr = new char[2];
+		
+		if (this.rank.getValue() < 10 ) {
+			outArr[0] = ("" + this.rank.getValue()).charAt( 0 );
+		} else {
+			outArr[0] = this.rank.name().charAt( 0 );
+		}
+
+		switch ( this.suit ) {
+			case SPADES:
+				outArr[1] = '\u2660';
+				break;
+			case HEARTS:
+				outArr[1] = '\u2665';
+				break;
+			case DIAMONDS:
+				outArr[1] = '\u2666';
+				break;
+			case CLUBS:
+				outArr[1] = '\u2663';
+				break;
+		}
+		
+		return outArr;
+		
+	}
 }

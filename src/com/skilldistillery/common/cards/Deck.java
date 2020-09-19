@@ -9,13 +9,22 @@ public class Deck {
 
 	public Deck( ) {
 
-		this.cards = new ArrayList < Card >( 52 ) ;
-		for ( Suit s : Suit.values() ) {
-			for ( Rank r : Rank.values() ) {
-				this.cards.add( new Card( r.name() , s.name() ) ) ;
+		this(1);
+
+	}
+	
+	public Deck( int shoeSize ) {
+		//Stretch goal: Deal from a multi-deck shoe.
+		this.cards = new ArrayList < Card >( 52 * shoeSize ) ;
+		
+		for ( int i = 0 ; i < shoeSize ; i++ ) {
+			for ( Suit s : Suit.values() ) {
+				for ( Rank r : Rank.values() ) {
+					this.cards.add( new Card( r.name() , s.name() ) ) ;
+				}
 			}
 		}
-
+		
 	}
 
 	public int checkDeckSize() {

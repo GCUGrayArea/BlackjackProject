@@ -1,227 +1,269 @@
-package com.skilldistillery.blackjack;
+package com.skilldistillery.blackjack ;
 
 import java.util.InputMismatchException ;
 
-import com.skilldistillery.common.cards.Card ;
-
 public class BlackjackGame {
-	
-	protected BlackjackPlayer player;
-	
-	protected BlackjackDealer dealer;
-	
-	private Outcome o;
-	
-	public BlackjackGame() {
-		
-		this.o = Outcome.DEALERWINS;
-		/* Defaulting to this will simplify some  of the control flow in
-		 * play(), and in any case everyone knows the house always wins.
-		 * Fields are constructed inside play a */
-		
+
+	protected BlackjackPlayer player ;
+
+	protected BlackjackDealer dealer ;
+
+	private boolean first;
+
+	private Outcome o ;
+
+	public BlackjackGame( ) {
+
+		this.first = true ;
+		this.player = new BlackjackPlayer() ;
+
 	}
-	
+
 	public static void main( String[] args ) {
-		java.util.Scanner kb = new java.util.Scanner( System.in );
-		BlackjackGame game = new BlackjackGame();
-		game.play( kb );
-		
-		game = null;
-		kb.close();
+
+		java.util.Scanner kb = new java.util.Scanner( System.in ) ;
+		BlackjackGame game = new BlackjackGame() ;
+		boolean stillPlaying ;
+
+		do {
+			stillPlaying = game.play( kb ) ;
+		} while ( stillPlaying ) ;
+
+		game = null ;
+		kb.close() ;
+
 	}
-	
-	public void play ( java.util.Scanner kb ) {
+
+	public boolean play( java.util.Scanner kb ) {
 		
-		this.player = new BlackjackPlayer();
-		this.dealer = new BlackjackDealer();
-		
-		dealInitialHands();
-		playerPlays( kb );
+		if ( this.first ) {
+			this.getShoeSize( kb );
+			this.first = false;
+		}
+
+		this.o = Outcome.DEALERWINS ;
+
+
+		dealInitialHands() ;
+		playerPlays( kb ) ;
 		if ( this.o == Outcome.DEALERWINS ) {
-			dealerPlays();
+			dealerPlays() ;
 		}
 		
-		printResults();
+		this.dealer.played = true;
+
+		printResults() ;
+		
+		this.dealer.nextShoeCheck() ;
+
+		return playAgain( kb );
 		
 	}
 
+	private void getShoeSize( java.util.Scanner kb ) {
+
+		int shoeSize;
+		System.out.println( "How many decks would you like to play with?" );
+		System.out.print( "(Common shoe sizes are 1, 2, 6 and 8 decks) " );
+		try {
+		shoeSize = kb.nextInt();
+		if ( shoeSize < 1 ) { throw new InputMismatchException(); }
+		this.dealer = new BlackjackDealer( shoeSize ) ;
+		} catch ( InputMismatchException e ) {
+			System.out.println( "Invalid input. Please enter a positive number of decks." ) ;
+			getShoeSize( kb );
+		}
+
+	}
 
 	private void dealInitialHands() {
-		
-		for (int i = 0; i < 2; i++) {
-			
-			dealer.dealCard( player );
-			dealer.dealCard( dealer );
-			
+
+		this.player.hand.clear() ;
+		this.dealer.hand.clear() ;
+
+		for ( int i = 0 ; i < 2 ; i++ ) {
+
+			this.dealer.dealCard( player ) ;
+			this.dealer.dealCard( dealer ) ;
+
 		}
-		
+
 	}
-	
+
 	private void playerPlays( java.util.Scanner kb ) {
+
+		boolean stillPlaying = true ;
+
+		/* Stretch goal:
+		 * "Blackjack" hand - if the user is initially dealt an Ace and a card with the
+		 * value 10, this is a blackjack. The user immediately wins unless the dealer
+		 * also has a blackjack (two-card hand with an Ace and a 10-value card).
+		 */
 		
-		boolean stillPlaying = true;
-		
-		if ( dealer.getHand().isBlackjack() && !player.getHand().isBlackjack() ) {
+		if ( dealer.hand.isBlackjack() && !player.getHand().isBlackjack() ) {
 			
-			//default outcome value is DEALERWINS so need to set it
-			return;
-			
+			// default outcome value is DEALERWINS so need to set it
+			return ;
+
 		}
-		
-		if ( player.getHand().isBlackjack() ) {
-			
-			if ( dealer.getHand().isBlackjack() ) {
-				
-				this.o = Outcome.PUSH;
-				return;
-				
+
+		if ( player.hand.isBlackjack() ) {
+
+			if ( dealer.hand.isBlackjack() ) {
+
+				this.o = Outcome.PUSH ;
+				return ;
+
 			} else {
-				
-				this.o = Outcome.PLAYERWINS;
-				return;
-				
+
+				this.o = Outcome.PLAYERWINS ;
+				return ;
+
 			}
-			
+
 		}
 		while ( stillPlaying ) {
-			
-			stillPlaying = playerChoice( kb );
-			
-			if ( player.getHand().isBust() ) {
-				
-			//default outcome value is DEALERWINS so need to set it
-				return;
-				
+
+			stillPlaying = playerChoice( kb ) ;
+
+			if ( player.hand.isBust() ) {
+
+				// default outcome value is DEALERWINS so need to set it
+				return ;
+
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private boolean playerChoice( java.util.Scanner kb ) {
-		boolean keepGoing;
-		int input;
-		
-		printPlayerHand();
-		System.out.println( "\n" ) ; //yes, two lines
-		System.out.printf(
-				"The dealer is showing %s%n." ,
-				this.dealer.getUpcard() ) ;
-		System.out.println( "* 1. Hit (take another card) *" ) ;
-		System.out.println( "* 2. Stand (take no more cards) " ) ;
+		//TODO add another menu option to double down
+		//Maybe also figure out splitting? but that seems *much* harder
+		//Alternatively if you implemented multiple players that might be similar?
+		boolean keepGoing ;
+		int input ;
+		System.out.println( "You have: " ) ;
+		this.player.printHand() ;
+		System.out.println( "\n" ) ; // yes, two lines
+		System.out.println( "The dealer is showing: " ) ;
+		this.dealer.printHand(false);
+		System.out.println( "* 1. Hit (take another card)    *" ) ;
+		System.out.println( "* 2. Stand (take no more cards) *" ) ;
 		System.out.printf( "What would you like to do? " ) ;
 		try {
-			input = kb.nextInt();
-			kb.nextLine();
+			input = kb.nextInt() ;
+			kb.nextLine() ;
 			if ( input < 1 || input > 2 ) {
-				
-				throw new InputMismatchException();
-				
+
+				throw new InputMismatchException() ;
+
 			}
-			
+
 			if ( input == 1 ) {
-				
-				this.dealer.dealCard( player );
-				
-				if (this.player.getHand().isBust() ) {
-					keepGoing = false;
+
+				this.dealer.dealCard( player ) ;
+
+				if ( this.player.hand.isBust() ) {
+					keepGoing = false ;
 				} else {
-					keepGoing = true;
+					keepGoing = true ;
 				}
-				
+
 			} else {
-				keepGoing = false;
+				keepGoing = false ;
 			}
-			
+
 		} catch ( InputMismatchException e ) {
-			
+
 			System.out.println( "Invalid input. Please select one of the listed options." ) ;
-			keepGoing = playerChoice( kb );
-			//better than letting a typo hang the program
-			
-		}
-		
-		return keepGoing;
-	
-	}
+			keepGoing = playerChoice( kb ) ;
+			// better than letting a typo hang the program
 
-	private void printPlayerHand() {
-		
-		for ( Card c : this.player.getHand().getCards() ) {
-			System.out.println( c ) ;
 		}
 
+		return keepGoing ;
+
 	}
-	
+
 	private void dealerPlays() {
-		
-		
-		this.dealer.play();
-		if ( this.dealer.getHand().isBust() ||
-					( this.player.getHand().getHandValue() > this.dealer.getHand().getHandValue() ) ) {
-			this.o = Outcome.PLAYERWINS;
-		} else if ( this.player.getHand().getHandValue() ==
-					this.dealer.getHand().getHandValue() ) {
-				
-			this.o = Outcome.PUSH;
-		
+
+		if ( this.player.hand.isBust() ) {
+			this.o = Outcome.DEALERWINS ;
+		} else {
+			this.dealer.play() ;
+			if ( this.dealer.getHand().isBust() || ( this.player.hand.getHandValue() > this.dealer.hand.getHandValue() ) ) {
+				this.o = Outcome.PLAYERWINS ;
+			} else if ( this.player.hand.getHandValue() == this.dealer.hand.getHandValue() ) {
+
+				this.o = Outcome.PUSH ;
+
+			}
 		}
-		
-		return;
-		
+
+		return ;
+
+	}
+
+	private void printResults() {
+		System.out.println( "Player:" ) ;
+		this.player.printHand();
+		System.out.println( "Dealer:" ) ;
+		this.dealer.printHand(true);
+
+		String modifier = "" ;
+
+		switch ( this.o ) {
+			case PLAYERWINS :
+				if ( this.player.getHand().isBlackjack() ) {
+					modifier = " with a blackjack" ;
+				} else if ( this.dealer.hand.isBust() ) {
+					modifier = String.format( " with %d: dealer broke" , this.player.hand.getHandValue() ) ;
+				} else {
+					modifier = String.format( ": %d beats %d" , this.player.hand.getHandValue() ,
+							this.dealer.hand.getHandValue() ) ;
+				}
+
+				System.out.printf( "Player wins%s!%n" , modifier ) ;
+				break ;
+			case PUSH :
+				if ( this.player.hand.isBlackjack() ) {
+					modifier = " with two blackjacks" ;
+				} else {
+					modifier = String.format( ": %d to %d" , this.player.hand.getHandValue() , this.dealer.hand.getHandValue() ) ;
+				}
+				System.out.printf( "This hand pushed%s.%n" , modifier ) ;
+				break ;
+			case DEALERWINS :
+				if ( this.dealer.hand.isBlackjack() ) {
+					modifier = " with blackjack" ;
+				} else if ( this.player.hand.isBust() ) {
+					modifier = ": player busted" ;
+				} else {
+					modifier = String.format( ": %d to %d" , this.dealer.hand.getHandValue() , this.player.hand.getHandValue() ) ;
+				}
+				System.out.printf( "Dealer wins%s.%n" , modifier ) ;
+				break ;
+		}
+
 	}
 	
-	private void printResults() {
-		String modifier = "";
-		
-		switch ( this.o ) {
-			case PLAYERWINS:
-				if ( this.player.getHand().isBlackjack() ) {
-					modifier = " with a blackjack";
-				} else if ( this.dealer.getHand().isBust() ) {
-					modifier = String.format(
-							" with %d: dealer broke" , 
-							this.player.getHand().getHandValue() );
-				} else {
-					modifier = String.format(
-							": %d beats %d" ,
-							this.player.getHand().getHandValue() ,
-							this.dealer.getHand().getHandValue() );
-				}
-				
-				System.out.printf(
-						"Player wins%s!" ,
-						modifier) ;
-				break;
-			case PUSH:
-				if ( this.player.getHand().isBlackjack() ) {
-					modifier = " with two blackjacks";
-				} else {
-					modifier = String.format(
-							": %d to %d", 
-							this.player.getHand().getHandValue() ,
-							this.dealer.getHand().getHandValue() );
-				}
-				System.out.printf(
-					"This hand pushed%s." ,
-					modifier );
-				break;
-			case DEALERWINS:
-				if ( this.dealer.getHand().isBlackjack() ) {
-					modifier = " with blackjack";
-				} else if (this.player.getHand().isBust() ) {
-					modifier = ": player busted";
-				} else {
-					modifier = String.format(
-							": %d to %d" ,
-							this.dealer.getHand().getHandValue() ,
-							this.player.getHand().getHandValue() );
-				}
-				System.out.printf( 
-						"Dealer wins%s." );
-				break;
+	private boolean playAgain ( java.util.Scanner kb ) {
+		System.out.print( "Would you like to play again? Y / N: " );
+		char yesNo = kb.nextLine().charAt(0);
+		switch (yesNo) {
+			case 'Y':
+			case 'y':
+				System.out.println( "Dealing next hand... (press enter)" ) ;
+				kb.nextLine();
+				return true;
+			case 'N':
+			case 'n':
+				System.out.println( "Come back soon!" ) ;
+				return false;
+			default:
+				return playAgain( kb );
 		}
-		
 	}
 
 }
