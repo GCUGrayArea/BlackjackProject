@@ -43,14 +43,15 @@ public class BlackjackGame {
 
 		this.o = Outcome.DEALERWINS ;
 
-
+		//TODO Implement a monetary system so players can place bets on their hands.
+		//TODO Allow multiple players in the game
+		//TODO provide the running HiLo count before the player is prompted to make betting decisions
+		
 		dealInitialHands() ;
 		playerPlays( kb ) ;
 		if ( this.o == Outcome.DEALERWINS ) {
 			dealerPlays() ;
 		}
-		
-		this.dealer.played = true;
 
 		printResults() ;
 		
@@ -67,6 +68,7 @@ public class BlackjackGame {
 		System.out.print( "(Common shoe sizes are 1, 2, 6 and 8 decks) " );
 		try {
 		shoeSize = kb.nextInt();
+		kb.nextLine();
 		if ( shoeSize < 1 ) { throw new InputMismatchException(); }
 		this.dealer = new BlackjackDealer( shoeSize ) ;
 		} catch ( InputMismatchException e ) {
@@ -100,7 +102,7 @@ public class BlackjackGame {
 		 * also has a blackjack (two-card hand with an Ace and a 10-value card).
 		 */
 		
-		if ( dealer.hand.isBlackjack() && !player.getHand().isBlackjack() ) {
+		if ( dealer.hand.isBlackjack() && !player.hand.isBlackjack() ) {
 			
 			// default outcome value is DEALERWINS so need to set it
 			return ;
@@ -139,8 +141,7 @@ public class BlackjackGame {
 
 	private boolean playerChoice( java.util.Scanner kb ) {
 		//TODO add another menu option to double down
-		//Maybe also figure out splitting? but that seems *much* harder
-		//Alternatively if you implemented multiple players that might be similar?
+		//TODO figure out how to implement splitting
 		boolean keepGoing ;
 		int input ;
 		System.out.println( "You have: " ) ;
@@ -164,7 +165,7 @@ public class BlackjackGame {
 
 				this.dealer.dealCard( player ) ;
 
-				if ( this.player.hand.isBust() ) {
+				if ( this.player.hand.isBust() || this.player.hand.getHandValue() == 21 ) {
 					keepGoing = false ;
 				} else {
 					keepGoing = true ;
@@ -192,7 +193,7 @@ public class BlackjackGame {
 			this.o = Outcome.DEALERWINS ;
 		} else {
 			this.dealer.play() ;
-			if ( this.dealer.getHand().isBust() || ( this.player.hand.getHandValue() > this.dealer.hand.getHandValue() ) ) {
+			if ( this.dealer.hand.isBust() || ( this.player.hand.getHandValue() > this.dealer.hand.getHandValue() ) ) {
 				this.o = Outcome.PLAYERWINS ;
 			} else if ( this.player.hand.getHandValue() == this.dealer.hand.getHandValue() ) {
 
@@ -209,13 +210,13 @@ public class BlackjackGame {
 		System.out.println( "Player:" ) ;
 		this.player.printHand();
 		System.out.println( "Dealer:" ) ;
-		this.dealer.printHand(true);
+		this.dealer.printHand();
 
 		String modifier = "" ;
 
 		switch ( this.o ) {
 			case PLAYERWINS :
-				if ( this.player.getHand().isBlackjack() ) {
+				if ( this.player.hand.isBlackjack() ) {
 					modifier = " with a blackjack" ;
 				} else if ( this.dealer.hand.isBust() ) {
 					modifier = String.format( " with %d: dealer broke" , this.player.hand.getHandValue() ) ;

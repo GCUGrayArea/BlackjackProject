@@ -1,11 +1,13 @@
 package com.skilldistillery.common.cards;
 
+import java.util.HashMap ;
 
 public class Card {
 	//DONE: Create a class called Card.
 	//DONE:	A card has a Suit and Rank. Set these in the constructor.
 	private Rank rank;
 	private Suit suit;
+	private HashMap<Suit, Character> suitchars;
 	
 	
 	
@@ -13,6 +15,11 @@ public class Card {
 		
 		this.rank = Rank.valueOf( rank );
 		this.suit = Suit.valueOf( suit );
+		this.suitchars = new HashMap<Suit, Character>();
+		this.suitchars.put( Suit.SPADES , '\u2660' );
+		this.suitchars.put( Suit.HEARTS , '\u2665' );
+		this.suitchars.put( Suit.DIAMONDS , '\u2666' );
+		this.suitchars.put( Suit.CLUBS , '\u2663' );
 				
 	}
 	
@@ -63,22 +70,24 @@ public class Card {
 		} else {
 			outArr[0] = this.rank.name().charAt( 0 );
 		}
-
-		switch ( this.suit ) {
-			case SPADES:
-				outArr[1] = '\u2660';
-				break;
-			case HEARTS:
-				outArr[1] = '\u2665';
-				break;
-			case DIAMONDS:
-				outArr[1] = '\u2666';
-				break;
-			case CLUBS:
-				outArr[1] = '\u2663';
-				break;
-		}
 		
+		outArr[1] = this.suitchars.get(this.suit);
+
+//		switch ( this.suit ) {
+//			case SPADES:
+//				outArr[1] = '\u2660';
+//				break;
+//			case HEARTS:
+//				outArr[1] = '\u2665';
+//				break;
+//			case DIAMONDS:
+//				outArr[1] = '\u2666';
+//				break;
+//			case CLUBS:
+//				outArr[1] = '\u2663';
+//				break;
+//		}
+//		
 		return outArr;
 		
 	}

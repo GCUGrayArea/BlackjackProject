@@ -29,11 +29,11 @@ public class BlackjackPlayer {
 
 	}
 
-	public BlackjackHand getHand() {
-
-		return this.hand ;
-
-	}
+//	public BlackjackHand getHand() {
+//
+//		return this.hand ;
+//
+//	}
 
 	public void printHand() {
 

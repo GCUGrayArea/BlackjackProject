@@ -7,7 +7,6 @@ public class BlackjackDealer extends BlackjackPlayer {
 
 	private Deck deck ;
 	private int shoeSize ;
-	public boolean played = false;
 
 //	public BlackjackDealer () {
 //		
